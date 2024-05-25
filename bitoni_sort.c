@@ -79,11 +79,26 @@ void compAndSwap(int a[], int i, int j, bool dir)
   The sequence to be sorted starts at index position low,
   the parameter cnt is the number of elements to be sorted.*/
 void bitonicMerge(int a[], int low, int cnt, bool dir)
+
 {
+#pragma omp critical
+	{
+		if (omp_get_thread_num() == 2 || omp_get_thread_num() == 1)
+		{
+			printf("thread num %d\n", omp_get_thread_num());
+			printf("Array being Merged: ");
+			for (int i = low; i < low + cnt; i++)
+			{
+				printf("%d ", a[i]);
+			}
+			printf("\n");
+		}
+	}
+
 	if (cnt > 1)
 	{
 		int k = cnt / 2;
-// #pragma omp parallel for schedule(s, 64)
+		// #pragma omp parallel for schedule(s, 64)
 		for (int i = low; i < low + k; i++)
 			compAndSwap(a, i, i + k, dir);
 		bitonicMerge(a, low, k, dir);
@@ -96,20 +111,63 @@ void bitonicMerge(int a[], int low, int cnt, bool dir)
 	calls bitonicMerge to make them in the same order */
 void bitonicSort(int a[], int low, int cnt, bool dir)
 {
+#pragma omp critical
+	{
+		if (omp_get_thread_num() == 2 || omp_get_thread_num() == 1)
+		{
+			printf("thread num %d\n", omp_get_thread_num());
+			printf("Array being handled: ");
+			for (int i = low; i < low + cnt; i++)
+			{
+				printf("%d ", a[i]);
+			}
+			printf("\n");
+		}
+	}
+
 	if (cnt > 1)
 	{
 		int k = cnt / 2;
 
-		// sort in ascending order since dir here is 1
-		bitonicSort(a, low, k, 1);
-		// sort in descending order since dir here is 0
-		bitonicSort(a, low + k, k, 0);
+		if (omp_get_thread_num() == 2 || omp_get_thread_num() == 1)
+		{
+			printf("k: %d\n", k);
+		}
+		{
+			/* code */
+		}
 
-		// Will merge whole sequence in ascending order
-		// since dir=1.
-
+		// if (cnt <= 256)
+		// {
+		// 	// printf("THis is run serially\n");
+		// 	// sort in ascending order since dir here is 1
+		// 	bitonicSort(a, low, k, 1);
+		// 	// sort in descending order since dir here is 0
+		// 	bitonicSort(a, low + k, k, 0);
+		// 	bitonicMerge(a, low, cnt, dir);
+		// }
+		// else
+		// {
+#pragma omp task
+		{
+			// int id = omp_get_thread_num();
+			// printf("Thread: %d will be in charge here \n", id);
+			// sort in ascending order since dir here is 1
+			bitonicSort(a, low, k, 1);
+		}
+#pragma omp task
+		{
+			// int id = omp_get_thread_num();
+			// printf("Thread: %d\n", id);
+			// sort in descending order since dir here is 0
+			bitonicSort(a, low + k, k, 0);
+		}
+#pragma omp taskwait
 		bitonicMerge(a, low, cnt, dir);
 	}
+
+	// Merging the whole sequence in the end
+	// }
 }
 
 int main(int argc, char *argv[])
@@ -137,9 +195,14 @@ int main(int argc, char *argv[])
 	isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
 	printf("QuickSort Time taken: %f\n", end - start);
 	double q_time = end - start;
-
+	omp_set_num_threads(4);
 	start = omp_get_wtime();
-	bitonicSort(arr_Open_mp, 0, n, 1);
+
+#pragma omp parallel
+	{
+#pragma omp single
+		bitonicSort(arr_Open_mp, 0, n, 1);
+	}
 
 	end = omp_get_wtime();
 	isSorted(arr_Open_mp, n) ? printf("Sorted\n") : printf("Not Sorted\n");
