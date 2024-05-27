@@ -78,22 +78,10 @@ void compAndSwap(int a[], int i, int j, bool dir)
   if dir = 1, and in descending order otherwise (means dir=0).
   The sequence to be sorted starts at index position low,
   the parameter cnt is the number of elements to be sorted.*/
-void bitonicMerge(int a[], int low, int cnt, bool dir)
+void bitonicMerge(int a[], int low, int cnt, bool dir,int stage)
+	
 
 {
-#pragma omp critical
-	{
-		if (omp_get_thread_num() == 2 || omp_get_thread_num() == 1)
-		{
-			printf("thread num %d\n", omp_get_thread_num());
-			printf("Array being Merged: ");
-			for (int i = low; i < low + cnt; i++)
-			{
-				printf("%d ", a[i]);
-			}
-			printf("\n");
-		}
-	}
 
 	if (cnt > 1)
 	{
@@ -101,69 +89,67 @@ void bitonicMerge(int a[], int low, int cnt, bool dir)
 		// #pragma omp parallel for schedule(s, 64)
 		for (int i = low; i < low + k; i++)
 			compAndSwap(a, i, i + k, dir);
-		bitonicMerge(a, low, k, dir);
-		bitonicMerge(a, low + k, k, dir);
+		bitonicMerge(a, low, k, dir, stage);
+		bitonicMerge(a, low + k, k, dir, stage);
 	}
 }
 
 /* This function first produces a bitonic sequence by recursively
 	sorting its two halves in opposite sorting orders, and then
 	calls bitonicMerge to make them in the same order */
-void bitonicSort(int a[], int low, int cnt, bool dir)
+void bitonicSort(int a[], int low, int cnt, bool dir, int stage)
 {
-#pragma omp critical
+	for (int i = 0; i < stage; i++)
 	{
-		if (omp_get_thread_num() == 2 || omp_get_thread_num() == 1)
-		{
-			printf("thread num %d\n", omp_get_thread_num());
-			printf("Array being handled: ");
-			for (int i = low; i < low + cnt; i++)
-			{
-				printf("%d ", a[i]);
-			}
-			printf("\n");
-		}
+		printf("    "); // Print 4 spaces for each stage
 	}
-
+	printf("Stage: %d\n", stage);
+	for (int i = 0; i < stage; i++)
+	{
+		printf("    "); // Print 4 spaces for each stage
+	}
+	for (int i = 0; i < 8; i++)
+	{
+		printf("%d ", a[i]);
+	}
+	printf("\n");
+	for (int i = 0; i < stage; i++)
+	{
+		printf("    "); // Print 4 spaces for each stage
+	}
+	printf("This is Bitonic Sort dir %d \n", dir);
 	if (cnt > 1)
 	{
+		stage++;
 		int k = cnt / 2;
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
+		printf("k: %d\n", k);
+		bitonicSort(a, low, k, 1, stage);
+		bitonicSort(a, low + k, k, 0, stage);
+		bitonicMerge(a, low, cnt, dir, stage);
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
+		printf("Stage: %d\n", stage);
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
+		printf("This is After Merge\n");
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
 
-		if (omp_get_thread_num() == 2 || omp_get_thread_num() == 1)
+		for (int i = 0; i < 8; i++)
 		{
-			printf("k: %d\n", k);
+			printf("%d ", a[i]);
 		}
-		{
-			/* code */
-		}
-
-		// if (cnt <= 256)
-		// {
-		// 	// printf("THis is run serially\n");
-		// 	// sort in ascending order since dir here is 1
-		// 	bitonicSort(a, low, k, 1);
-		// 	// sort in descending order since dir here is 0
-		// 	bitonicSort(a, low + k, k, 0);
-		// 	bitonicMerge(a, low, cnt, dir);
-		// }
-		// else
-		// {
-#pragma omp task
-		{
-			// int id = omp_get_thread_num();
-			// printf("Thread: %d will be in charge here \n", id);
-			// sort in ascending order since dir here is 1
-			bitonicSort(a, low, k, 1);
-		}
-#pragma omp task
-		{
-			// int id = omp_get_thread_num();
-			// printf("Thread: %d\n", id);
-			// sort in descending order since dir here is 0
-			bitonicSort(a, low + k, k, 0);
-		}
-#pragma omp taskwait
-		bitonicMerge(a, low, cnt, dir);
+		printf("\n");
 	}
 
 	// Merging the whole sequence in the end
@@ -174,9 +160,17 @@ int main(int argc, char *argv[])
 {
 	int p = atoi(argv[1]);
 	int size = pow(2, p);
-	int arr_serial[size];
-	int arr_Open_mp[size];
-	int arr_MPI[size];
+	int *arr_serial = (int *)malloc(size * sizeof(int));
+	int *arr_Open_mp = (int *)malloc(size * sizeof(int));
+	int *arr_MPI = (int *)malloc(size * sizeof(int));
+
+	int array[8] = {16,8, 19, 20, 25, 6, 13, 15};
+	if (arr_serial == NULL || arr_Open_mp == NULL || arr_MPI == NULL)
+	{
+		// handle error, for example:
+		fprintf(stderr, "Memory allocation failed\n");
+		exit(1);
+	}
 	srand(time(0));
 	//  this is just creating the array i am going to sort
 	for (int i = 0; i < size; i++)
@@ -189,26 +183,27 @@ int main(int argc, char *argv[])
 	double start, end;
 	start = omp_get_wtime();
 	// this is giving use the size of the array
-	int n = sizeof(arr_serial) / sizeof(arr_serial[0]);
+	int n = size;
 	quickSort(arr_serial, 0, n - 1);
 	end = omp_get_wtime();
-	isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-	printf("QuickSort Time taken: %f\n", end - start);
+	// isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
+	// printf("QuickSort Time taken: %f\n", end - start);
 	double q_time = end - start;
 	omp_set_num_threads(4);
-	start = omp_get_wtime();
+	// start = omp_get_wtime();
+	bitonicSort(array, 0, 8, 1, 0);
 
-#pragma omp parallel
+	// end = omp_get_wtime();
+	// isSorted(arr_Open_mp, n) ? printf("Sorted\n") : printf("Not Sorted\n");
+	// double b_time = end - start;
+	// printf("Bitonic Time taken: %f\n", end - start);
+	// double Speedup = (q_time) / (b_time);
+
+	for (int i = 0; i < 8; i++)
 	{
-#pragma omp single
-		bitonicSort(arr_Open_mp, 0, n, 1);
+		printf("%d ", array[i]);
 	}
+	printf("\n");
 
-	end = omp_get_wtime();
-	isSorted(arr_Open_mp, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-	double b_time = end - start;
-	printf("Bitonic Time taken: %f\n", end - start);
-	double Speedup = (q_time) / (b_time);
-
-	printf("Speedup: %f\n", Speedup);
+	// printf("Speedup: %f\n", Speedup);
 }
