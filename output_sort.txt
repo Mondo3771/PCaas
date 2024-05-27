@@ -1,8 +1,0 @@
-Sorted
-QuickSort Time taken: 0.734640
-Sorted
-Average Bitonic Time taken: 0.964448
-Speedup: 0.761721
-Sorted
-Average Bitonic serial Time taken: 4.320048
-Speedup of Bitonic Sorts: 4.479296

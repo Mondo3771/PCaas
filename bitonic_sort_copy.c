@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 	// int cut_off = pow(2, p - 3);
 	double start, end;
 	double total_time = 0.0;
-	int num_runs = 10;
+	int num_runs = 1;
 	for (int i = 0; i < num_runs; i++)
 	{
 		start = omp_get_wtime();
