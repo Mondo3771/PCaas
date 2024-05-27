@@ -16,6 +16,8 @@ This is Bitonic Sort dir 1
             Stage: 3
             16 8 19 20 25 6 13 15 
             This is Bitonic Sort dir 0 
+            This is Bitonic Merge dir 1 
+            Comparing a[0] = 16 and a[1] = 8
             Stage: 3
             This is After Merge
             8 16 19 20 25 6 13 15 
@@ -29,9 +31,18 @@ This is Bitonic Sort dir 1
             Stage: 3
             8 16 19 20 25 6 13 15 
             This is Bitonic Sort dir 0 
+            This is Bitonic Merge dir 0 
+            Comparing a[2] = 19 and a[3] = 20
             Stage: 3
             This is After Merge
             8 16 20 19 25 6 13 15 
+        This is Bitonic Merge dir 1 
+        Comparing a[0] = 8 and a[2] = 20
+        Comparing a[1] = 16 and a[3] = 19
+        This is Bitonic Merge dir 1 
+        Comparing a[0] = 8 and a[1] = 16
+        This is Bitonic Merge dir 1 
+        Comparing a[2] = 20 and a[3] = 19
         Stage: 2
         This is After Merge
         8 16 19 20 25 6 13 15 
@@ -49,6 +60,8 @@ This is Bitonic Sort dir 1
             Stage: 3
             8 16 19 20 25 6 13 15 
             This is Bitonic Sort dir 0 
+            This is Bitonic Merge dir 1 
+            Comparing a[4] = 25 and a[5] = 6
             Stage: 3
             This is After Merge
             8 16 19 20 6 25 13 15 
@@ -62,12 +75,40 @@ This is Bitonic Sort dir 1
             Stage: 3
             8 16 19 20 6 25 13 15 
             This is Bitonic Sort dir 0 
+            This is Bitonic Merge dir 0 
+            Comparing a[6] = 13 and a[7] = 15
             Stage: 3
             This is After Merge
             8 16 19 20 6 25 15 13 
+        This is Bitonic Merge dir 0 
+        Comparing a[4] = 6 and a[6] = 15
+        Comparing a[5] = 25 and a[7] = 13
+        This is Bitonic Merge dir 0 
+        Comparing a[4] = 15 and a[5] = 25
+        This is Bitonic Merge dir 0 
+        Comparing a[6] = 6 and a[7] = 13
         Stage: 2
         This is After Merge
         8 16 19 20 25 15 13 6 
+    This is Bitonic Merge dir 1 
+    Comparing a[0] = 8 and a[4] = 25
+    Comparing a[1] = 16 and a[5] = 15
+    Comparing a[2] = 19 and a[6] = 13
+    Comparing a[3] = 20 and a[7] = 6
+    This is Bitonic Merge dir 1 
+    Comparing a[0] = 8 and a[2] = 13
+    Comparing a[1] = 15 and a[3] = 6
+    This is Bitonic Merge dir 1 
+    Comparing a[0] = 8 and a[1] = 6
+    This is Bitonic Merge dir 1 
+    Comparing a[2] = 13 and a[3] = 15
+    This is Bitonic Merge dir 1 
+    Comparing a[4] = 25 and a[6] = 19
+    Comparing a[5] = 16 and a[7] = 20
+    This is Bitonic Merge dir 1 
+    Comparing a[4] = 19 and a[5] = 16
+    This is Bitonic Merge dir 1 
+    Comparing a[6] = 25 and a[7] = 20
     Stage: 1
     This is After Merge
     6 8 13 15 16 19 20 25 

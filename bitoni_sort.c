@@ -68,8 +68,13 @@ bool isSorted(int arr[], int n)
 }
 
 // fisrt i must convert an array into a bitonic sequence
-void compAndSwap(int a[], int i, int j, bool dir)
+void compAndSwap(int a[], int i, int j, bool dir, int stage)
 {
+	for (int i = 0; i < stage; i++)
+	{
+		printf("    "); // Print 4 spaces for each stage
+	}
+	printf("Comparing a[%d] = %d and a[%d] = %d\n", i, a[i], j, a[j]);
 	if (dir == (a[i] > a[j]))
 		swap(&a[i], &a[j]);
 }
@@ -78,17 +83,22 @@ void compAndSwap(int a[], int i, int j, bool dir)
   if dir = 1, and in descending order otherwise (means dir=0).
   The sequence to be sorted starts at index position low,
   the parameter cnt is the number of elements to be sorted.*/
-void bitonicMerge(int a[], int low, int cnt, bool dir,int stage)
-	
+void bitonicMerge(int a[], int low, int cnt, bool dir, int stage)
 
 {
 
 	if (cnt > 1)
 	{
+			for (int i = 0; i < stage; i++)
+	{
+		printf("    "); // Print 4 spaces for each stage
+	}
+		printf("This is Bitonic Merge dir %d \n", dir);
+
 		int k = cnt / 2;
 		// #pragma omp parallel for schedule(s, 64)
 		for (int i = low; i < low + k; i++)
-			compAndSwap(a, i, i + k, dir);
+			compAndSwap(a, i, i + k, dir, stage);
 		bitonicMerge(a, low, k, dir, stage);
 		bitonicMerge(a, low + k, k, dir, stage);
 	}
@@ -164,7 +174,7 @@ int main(int argc, char *argv[])
 	int *arr_Open_mp = (int *)malloc(size * sizeof(int));
 	int *arr_MPI = (int *)malloc(size * sizeof(int));
 
-	int array[8] = {16,8, 19, 20, 25, 6, 13, 15};
+	int array[8] = {16, 8, 19, 20, 25, 6, 13,15};
 	if (arr_serial == NULL || arr_Open_mp == NULL || arr_MPI == NULL)
 	{
 		// handle error, for example:
