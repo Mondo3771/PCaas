@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <mpi.h>
 
 // this will swap the two values, they will point to their respective values
 void swap(int *p1, int *p2)
@@ -97,17 +98,48 @@ void bitonicMerge(int a[], int low, int cnt, bool dir, int stage, int cut_off)
 /* This function first produces a bitonic sequence by recursively
     sorting its two halves in opposite sorting orders, and then
     calls bitonicMerge to make them in the same order */
+
 void bitonicSort(int a[], int low, int cnt, bool dir, int stage, int cut_off)
 {
-
     if (cnt > 1)
     {
         stage++;
 
         int k = cnt / 2;
-        bitonicSort(a, low, k, 1, stage, cut_off);
-        bitonicSort(a, low + k, k, 0, stage, cut_off);
 
+        int rank, size;
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+        // Calculate the range of data for this process
+        int range = cnt / size;
+        int start = low + range * rank;
+        int end = start + range;
+
+        // Sort the data for this process
+        bitonicSort(a, start, end - start, dir, stage, cut_off);
+
+        // Merge the data from all processes
+        for (int i = 0; i < size; i++)
+        {
+            if (i != rank)
+            {
+                // Receive data from process i
+                MPI_Recv(a + start, range, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            }
+        }
+
+        // Send the sorted data to all other processes
+        for (int i = 0; i < size; i++)
+        {
+            if (i != rank)
+            {
+                // Send data to process i
+                MPI_Send(a + start, range, MPI_INT, i, 0, MPI_COMM_WORLD);
+            }
+        }
+
+        // Merge the sorted data
         bitonicMerge(a, low, cnt, dir, stage, cut_off);
     }
 }
