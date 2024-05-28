@@ -85,15 +85,19 @@ void bitonicMerge(int a[], int low, int cnt, bool dir, int stage, int cut_off)
 	if (cnt > 1)
 	{
 		int k = cnt / 2;
-		for (int i = low; i < low + k; i++)
-			compAndSwap(a, i, i + k, dir, stage);
+
 		if (k < cut_off)
 		{
+			for (int i = low; i < low + k; i++)
+				compAndSwap(a, i, i + k, dir, stage);
 			bitonicMerge(a, low, k, dir, stage, cut_off);
 			bitonicMerge(a, low + k, k, dir, stage, cut_off);
 		}
 		else
 		{
+#pragma omp for schedule(dynamic,1024)
+			for (int i = low; i < low + k; i++)
+				compAndSwap(a, i, i + k, dir, stage);
 #pragma omp task shared(a)
 			bitonicMerge(a, low, k, dir, stage, cut_off);
 #pragma omp task shared(a)

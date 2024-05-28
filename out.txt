@@ -1,0 +1,13 @@
+Time taken by SErial: 0.000001
+Sorted
+Before:3 
+6 11 11 13 16 10 5 2 2 2 9 16 12 11 10 10 
+Start_i:20 
+After 1 :4 
+6 11 11 13 16 10 5 2 2 2 9 16 12 11 10 10 
+After 2 :4 
+6 10 2 2 0 0 5 10 2 2 9 16 12 11 10 10 
+Time taken by MPI: 0.000071
+Not Sorted
+Speedup: 0.017012
+
