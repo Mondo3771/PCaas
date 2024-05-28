@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
     }
     // this is doing step 3,2 in the example
     for (int i = start_1; i < start_1 + segment / 2; i++)
-        compAndSwap(arr_MPI, i, i + segment, 1);
+        compAndSwap(arr_MPI, i, i + segment, rank % 2 ? 1 : 0);
     if (rank == 3)
     {
         printf("After 1 :%i \n", segment);
