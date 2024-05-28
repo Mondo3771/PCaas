@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+int s = 16;
 
 // this will swap the two values, they will point to their respective values
 void swap(int *p1, int *p2)
@@ -45,11 +46,6 @@ void quickSort(int arr[], int low, int high)
 
 		int pi = partition(arr, low, high);
 
-		// Recursion Call
-		// smaller element than pivot goes left and
-		// higher element goes right
-
-		// we know that the pivot element is at the right place and everything to the left of the pivot is less than the pivot
 		quickSort(arr, low, pi - 1);
 		quickSort(arr, pi + 1, high);
 	}
@@ -86,15 +82,19 @@ void compAndSwap(int a[], int i, int j, bool dir, int stage)
 void bitonicMerge(int a[], int low, int cnt, bool dir, int stage)
 
 {
-
+	stage++;
 	if (cnt > 1)
 	{
-			for (int i = 0; i < stage; i++)
-	{
-		printf("    "); // Print 4 spaces for each stage
-	}
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
 		printf("This is Bitonic Merge dir %d \n", dir);
-
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
+		printf("This is low : %d and high %d \n", low, cnt);
 		int k = cnt / 2;
 		// #pragma omp parallel for schedule(s, 64)
 		for (int i = low; i < low + k; i++)
@@ -118,7 +118,7 @@ void bitonicSort(int a[], int low, int cnt, bool dir, int stage)
 	{
 		printf("    "); // Print 4 spaces for each stage
 	}
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < s; i++)
 	{
 		printf("%d ", a[i]);
 	}
@@ -128,6 +128,11 @@ void bitonicSort(int a[], int low, int cnt, bool dir, int stage)
 		printf("    "); // Print 4 spaces for each stage
 	}
 	printf("This is Bitonic Sort dir %d \n", dir);
+	for (int i = 0; i < stage; i++)
+	{
+		printf("    "); // Print 4 spaces for each stage
+	}
+	printf("This is low : %d and high %d \n", low, cnt);
 	if (cnt > 1)
 	{
 		stage++;
@@ -137,9 +142,32 @@ void bitonicSort(int a[], int low, int cnt, bool dir, int stage)
 			printf("    "); // Print 4 spaces for each stage
 		}
 		printf("k: %d\n", k);
+
 		bitonicSort(a, low, k, 1, stage);
 		bitonicSort(a, low + k, k, 0, stage);
+
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
+		printf("This is Doing Merge of stage %d\n", stage);
+
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
+		printf("This is Before Merge\n");
+		for (int i = 0; i < stage; i++)
+		{
+			printf("    "); // Print 4 spaces for each stage
+		}
+		for (int i = 0; i < s; i++)
+		{
+			printf("%d ", a[i]);
+		}
+
 		bitonicMerge(a, low, cnt, dir, stage);
+
 		for (int i = 0; i < stage; i++)
 		{
 			printf("    "); // Print 4 spaces for each stage
@@ -155,7 +183,7 @@ void bitonicSort(int a[], int low, int cnt, bool dir, int stage)
 			printf("    "); // Print 4 spaces for each stage
 		}
 
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < s; i++)
 		{
 			printf("%d ", a[i]);
 		}
@@ -174,7 +202,7 @@ int main(int argc, char *argv[])
 	int *arr_Open_mp = (int *)malloc(size * sizeof(int));
 	int *arr_MPI = (int *)malloc(size * sizeof(int));
 
-	int array[8] = {16, 8, 19, 20, 25, 6, 13,15};
+	int array[16] = {16, 8, 19, 20, 25, 6, 13, 15, 16, 8, 19, 20, 25, 6, 13, 15};
 	if (arr_serial == NULL || arr_Open_mp == NULL || arr_MPI == NULL)
 	{
 		// handle error, for example:
@@ -201,7 +229,7 @@ int main(int argc, char *argv[])
 	double q_time = end - start;
 	omp_set_num_threads(4);
 	// start = omp_get_wtime();
-	bitonicSort(array, 0, 8, 1, 0);
+	bitonicSort(array, 0, s, 1, 0);
 
 	// end = omp_get_wtime();
 	// isSorted(arr_Open_mp, n) ? printf("Sorted\n") : printf("Not Sorted\n");
@@ -209,7 +237,7 @@ int main(int argc, char *argv[])
 	// printf("Bitonic Time taken: %f\n", end - start);
 	// double Speedup = (q_time) / (b_time);
 
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < s; i++)
 	{
 		printf("%d ", array[i]);
 	}
