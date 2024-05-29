@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     // {
     //     printf("%d ", arr_MPI[i]);
     // }
-    printf("\n");
+  
     if (rank == 0)
     {
         end = MPI_Wtime();
