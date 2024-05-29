@@ -204,9 +204,14 @@ int main(int argc, char *argv[])
 		quickSort(arr_serial, 0, n - 1);
 
 		end = omp_get_wtime();
+		for (int i = 0; i < n; i++)
+		{
+			arr_serial[i] = array[i];
+		}
 
 		total_time += end - start;
 	}
+	quickSort(arr_serial, 0, n - 1);
 	double q_time = total_time / num_runs;
 	isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
 	printf("QuickSort Time taken: %f\n", q_time);
@@ -226,10 +231,10 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < num_runs; i++)
 	{
-		for (int i = 0; i < n; i++)
-		{
-			arr_Open_mp[i] = array[i];
-		}
+		// for (int i = 0; i < n; i++)
+		// {
+		// 	arr_Open_mp[i] = array[i];
+		// }
 		start = omp_get_wtime();
 
 #pragma omp parallel num_threads(16)
