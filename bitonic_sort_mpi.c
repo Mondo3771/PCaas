@@ -171,65 +171,71 @@ int main(int argc, char *argv[])
     }
 
     bitonicSort(arr_MPI, low, high, dir);
-    MPI_Allgather(arr_MPI + low, high, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
-    // this is as good as it gets , i need to figuer out how to merge the arrays together
+    // MPI_Allgather(arr_MPI + low, high, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
+    // // this is as good as it gets , i need to figuer out how to merge the arrays together
 
-    // this is parallelizable
-    int start_1; // this is where each process starts the comparison , we need these two values to know where to combine them from
-    start_1 = (rank / 2) * 4 * segment + 4 * (rank % 2);
-    // 0 = 0
-    // 1 = 4
-    // 2 = 16
-    // 3 = 20
-    // int start_2 =
-    // this sort the 1sthalf in accessending order
-    if (rank == 3)
-    {
-        {
-            printf("Before:%i \n", rank);
-            for (int i = 0; i < n; i++)
-            {
-                printf("%d ", arr_MPI[i]);
-            }
-            printf("\n");
-        }
-        printf("Start_i:%i \n", start_1);
-    }
-    // this is doing step 3,2 in the example
-    for (int i = start_1; i < start_1 + segment / 2; i++)
-        compAndSwap(arr_MPI, i, i + segment, rank % 2 ? 1 : 0);
-    if (rank == 3)
-    {
-        printf("After 1 :%i \n", segment);
-        for (int i = 0; i < n; i++)
-        {
-            printf("%d ", arr_MPI[i]);
-        }
-        printf("\n");
-    }
-    MPI_Allgather(arr_MPI + start_1, segment / 2, MPI_INT, arr_MPI, segment / 2, MPI_INT, MPI_COMM_WORLD);
-    if (rank == 3)
-    {
-        printf("After 2 :%i \n", segment);
-        for (int i = 0; i < n; i++)
-        {
-            printf("%d ", arr_MPI[i]);
-        }
-        printf("\n");
-    }
-    MPI_Allgather(arr_MPI + start_1 + segment / 2, segment / 2, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
+    // // this is parallelizable
+    // int start_1; // this is where each process starts the comparison , we need these two values to know where to combine them from
+    // start_1 = (rank / 2) * 4 * segment + 4 * (rank % 2);
+    // // 0 = 0
+    // // 1 = 4
+    // // 2 = 16
+    // // 3 = 20
+    // // int start_2 =
+    // // this sort the 1sthalf in accessending order
+    // if (rank == 3)
+    // {
+    //     {
+    //         printf("Before:%i \n", rank);
+    //         for (int i = 0; i < n; i++)
+    //         {
+    //             printf("%d ", arr_MPI[i]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("Start_i:%i \n", start_1);
+    // }
+    // // this is doing step 3,2 in the example
+    // for (int i = start_1; i < start_1 + segment / 2; i++)
+    //     compAndSwap(arr_MPI, i, i + segment, rank % 2 ? 1 : 0);
+    // if (rank == 3)
+    // {
+    //     printf("After 1 :%i \n", segment);
+    //     for (int i = 0; i < n; i++)
+    //     {
+    //         printf("%d ", arr_MPI[i]);
+    //     }
+    //     printf("\n");
+    // }
+    // MPI_Allgather(arr_MPI + start_1, segment / 2, MPI_INT, arr_MPI, segment / 2, MPI_INT, MPI_COMM_WORLD);
+    // if (rank == 3)
+    // {
+    //     printf("After 2 :%i \n", segment);
+    //     for (int i = 0; i < n; i++)
+    //     {
+    //         printf("%d ", arr_MPI[i]);
+    //     }
+    //     printf("\n");
+    // }
+    // MPI_Allgather(arr_MPI + start_1 + segment / 2, segment / 2, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
 
-    bitonicMerge(arr_MPI, segment * rank, segment, rank % 2 ? 1 : 0);
-    MPI_Allgather(arr_MPI + start_1, segment, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
+    // bitonicMerge(arr_MPI, segment * rank, segment, rank % 2 ? 1 : 0);
+    // MPI_Allgather(arr_MPI + start_1, segment, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
     //  this is supposed to be in accessending order then decending order in the midle
 
-    // // this sorts the 2nd half in decending order
-    // else if (rank == 2)
-    // {
-    //     bitonicMerge(arr_MPI, segment * 2, segment * 2, 0);
-    //     MPI_Send(arr_MPI + segment * 2, segment * 2, MPI_INT, 0, 0, MPI_COMM_WORLD);
-    // }
+    // this sorts the 2nd half in decending order
+    MPI_Allgather(arr_MPI + low, high, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
+    if (rank == 0)
+    {
 
+        bitonicMerge(arr_MPI, low, segment * 2, 1);
+    }
+    else if (rank == 2)
+    {
+        bitonicMerge(arr_MPI, segment * 2, segment * 2, 0);
+    }
+    MPI_Bcast(arr_MPI, segment * 2, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(arr_MPI + segment * 2, segment * 2, MPI_INT, 2, MPI_COMM_WORLD);
     if (rank == 0)
     {
 

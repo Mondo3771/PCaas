@@ -95,7 +95,6 @@ void bitonicMerge(int a[], int low, int cnt, bool dir, int stage, int cut_off)
 		}
 		else
 		{
-#pragma omp for schedule(dynamic,1024)
 			for (int i = low; i < low + k; i++)
 				compAndSwap(a, i, i + k, dir, stage);
 #pragma omp task shared(a)
@@ -201,14 +200,14 @@ int main(int argc, char *argv[])
 		quickSort(arr_serial, 0, n - 1);
 
 		end = omp_get_wtime();
-		for (int i = 0; i < n; i++)
-		{
-			arr_serial[i] = array[i];
-		}
+		// for (int i = 0; i < n; i++)
+		// {
+		// 	arr_serial[i] = array[i];
+		// }
 
 		total_time += end - start;
 	}
-	quickSort(arr_serial, 0, n - 1);
+	// quickSort(arr_serial, 0, n - 1);
 	double q_time = total_time / num_runs;
 	isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
 	printf("QuickSort Time taken: %f\n", q_time);
@@ -228,10 +227,10 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < num_runs; i++)
 	{
-		for (int i = 0; i < n; i++)
-		{
-			arr_Open_mp[i] = array[i];
-		}
+		// for (int i = 0; i < n; i++)
+		// {
+		// 	arr_Open_mp[i] = array[i];
+		// }
 		start = omp_get_wtime();
 
 #pragma omp parallel num_threads(16)
@@ -253,24 +252,24 @@ int main(int argc, char *argv[])
 
 	double Speedup = (q_time) / (b_time);
 	printf("Speedup: %f\n", Speedup);
-	total_time = 0.0;
-	for (int i = 0; i < num_runs; i++)
-	{
-		for (int i = 0; i < n; i++)
-		{
-			arr_MPI[i] = array[i];
-		}
-		start = omp_get_wtime();
-		bitonicSort_Seq(arr_MPI, 0, n, 1, 0, cut_off);
-		end = omp_get_wtime();
-		total_time += end - start;
-	}
+	// total_time = 0.0;
+	// for (int i = 0; i < num_runs; i++)
+	// {
+	// 	for (int i = 0; i < n; i++)
+	// 	{
+	// 		arr_MPI[i] = array[i];
+	// 	}
+	// 	start = omp_get_wtime();
+	// 	bitonicSort_Seq(arr_MPI, 0, n, 1, 0, cut_off);
+	// 	end = omp_get_wtime();
+	// 	total_time += end - start;
+	// }
 
-	double bs_time = total_time / num_runs;
-	isSorted(arr_MPI, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-	printf("Average Bitonic serial Time taken: %f\n", bs_time);
-	Speedup = (bs_time) / (b_time);
-	printf("Speedup of Bitonic Sorts: %f\n", Speedup);
+	// double bs_time = total_time / num_runs;
+	// isSorted(arr_MPI, n) ? printf("Sorted\n") : printf("Not Sorted\n");
+	// printf("Average Bitonic serial Time taken: %f\n", bs_time);
+	// Speedup = (bs_time) / (b_time);
+	// printf("Speedup of Bitonic Sorts: %f\n", Speedup);
 
 	free(arr_serial);
 	free(arr_Open_mp);
