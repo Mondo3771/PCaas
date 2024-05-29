@@ -171,8 +171,8 @@ int main(int argc, char *argv[])
     }
 
     bitonicSort(arr_MPI, low, high, dir);
-    MPI_Allgather(arr_MPI + low, high, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
-    // this is as good as it gets , i need to figuer out how to merge the arrays together
+    // MPI_Allgather(arr_MPI + low, high, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
+    // // this is as good as it gets , i need to figuer out how to merge the arrays together
 
     // // this is parallelizable
     // int start_1; // this is where each process starts the comparison , we need these two values to know where to combine them from
@@ -223,18 +223,19 @@ int main(int argc, char *argv[])
     // MPI_Allgather(arr_MPI + start_1, segment, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
     //  this is supposed to be in accessending order then decending order in the midle
 
-    // // this sorts the 2nd half in decending order
-     if (rank == 0)
+    // this sorts the 2nd half in decending order
+    MPI_Allgather(arr_MPI + low, high, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
+    if (rank == 0)
     {
+
         bitonicMerge(arr_MPI, low, segment * 2, 1);
-        MPI_Recv(arr_MPI , segment * 2, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
     else if (rank == 2)
     {
         bitonicMerge(arr_MPI, segment * 2, segment * 2, 0);
-        MPI_Send(arr_MPI + segment * 2, segment * 2, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
-
+    MPI_Bcast(arr_MPI, segment * 2, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(arr_MPI + segment * 2, segment * 2, MPI_INT, 2, MPI_COMM_WORLD);
     if (rank == 0)
     {
 
