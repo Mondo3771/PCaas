@@ -9,12 +9,13 @@
 // this will swap the two values, they will point to their respective values
 void swap(int *p1, int *p2)
 {
-	int temp;
-	temp = *p1;
-	*p1 = *p2;
-	*p2 = temp;
+	if (p1 != p2)
+	{
+		*p1 ^= *p2;
+		*p2 ^= *p1;
+		*p1 ^= *p2;
+	}
 }
-
 int partition(int arr[], int low, int high)
 {
 	// choose the last elemeent as the pivot element
@@ -97,9 +98,9 @@ void bitonicMerge(int a[], int low, int cnt, bool dir, int stage, int cut_off)
 		{
 			for (int i = low; i < low + k; i++)
 				compAndSwap(a, i, i + k, dir, stage);
-#pragma omp task shared(a)
+#pragma omp task 
 			bitonicMerge(a, low, k, dir, stage, cut_off);
-#pragma omp task shared(a)
+#pragma omp task 
 			bitonicMerge(a, low + k, k, dir, stage, cut_off);
 #pragma omp taskwait
 		}
@@ -119,48 +120,18 @@ void bitonicSort(int a[], int low, int cnt, bool dir, int stage, int cut_off)
 		int k = cnt / 2;
 		if (k < cut_off)
 		{
-
 			bitonicSort(a, low, k, 1, stage, cut_off);
 			bitonicSort(a, low + k, k, 0, stage, cut_off);
 		}
 		else
 		{
-#pragma omp task shared(a)
-			bitonicSort(a, low, k, 1, stage, cut_off);
-#pragma omp task shared(a)
+#pragma omp task shared(a, low, k, stage, cut_off)
+				bitonicSort(a, low, k, 1, stage, cut_off);
+#pragma omp task shared(a, low, k, stage, cut_off)
 			bitonicSort(a, low + k, k, 0, stage, cut_off);
 #pragma omp taskwait
 		}
 		bitonicMerge(a, low, cnt, dir, stage, cut_off);
-	}
-
-	// Merging the whole sequence in the end
-	// }
-}
-void bitonicMerge_Seq(int a[], int low, int cnt, bool dir, int stage, int cut_off)
-{
-	if (cnt > 1)
-	{
-		int k = cnt / 2;
-		for (int i = low; i < low + k; i++)
-			compAndSwap(a, i, i + k, dir, stage);
-		bitonicMerge_Seq(a, low, k, dir, stage, cut_off);
-		bitonicMerge_Seq(a, low + k, k, dir, stage, cut_off);
-	}
-}
-
-/* This function first produces a bitonic sequence by recursively
-	sorting its two halves in opposite sorting orders, and then
-	calls bitonicMerge_Seq to make them in the same order */
-void bitonicSort_Seq(int a[], int low, int cnt, bool dir, int stage, int cut_off)
-{
-
-	if (cnt > 1)
-	{
-		int k = cnt / 2;
-		bitonicSort_Seq(a, low, k, 1, stage, cut_off);
-		bitonicSort_Seq(a, low + k, k, 0, stage, cut_off);
-		bitonicMerge_Seq(a, low, cnt, dir, stage, cut_off);
 	}
 }
 
@@ -196,10 +167,6 @@ int main(int argc, char *argv[])
 	int num_runs = 1;
 	for (int i = 0; i < num_runs; i++)
 	{
-		// 	for (int i = 0; i < n; i++)
-		// {
-		// 	arr_serial[i] = array[i];
-		// }
 		start = omp_get_wtime();
 		quickSort(arr_serial, 0, n - 1);
 
@@ -222,7 +189,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		cut_off = pow(2, p - 3);
+		cut_off = pow(2, p - 4);
 	}
 
 	omp_set_nested(1);
@@ -237,8 +204,9 @@ int main(int argc, char *argv[])
 		// }
 		start = omp_get_wtime();
 
-#pragma omp parallel num_threads(16)
+#pragma omp parallel num_threads(8)
 		{
+
 #pragma omp single
 			{
 				bitonicSort(arr_Open_mp, 0, n, 1, 0, cut_off);
@@ -256,25 +224,6 @@ int main(int argc, char *argv[])
 
 	double Speedup = (q_time) / (b_time);
 	printf("Speedup: %f\n", Speedup);
-	// total_time = 0.0;
-	// for (int i = 0; i < num_runs; i++)
-	// {
-	// 	for (int i = 0; i < n; i++)
-	// 	{
-	// 		arr_MPI[i] = array[i];
-	// 	}
-	// 	start = omp_get_wtime();
-	// 	bitonicSort_Seq(arr_MPI, 0, n, 1, 0, cut_off);
-	// 	end = omp_get_wtime();
-	// 	total_time += end - start;
-	// }
-
-	// double bs_time = total_time / num_runs;
-	// isSorted(arr_MPI, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-	// printf("Average Bitonic serial Time taken: %f\n", bs_time);
-	// Speedup = (bs_time) / (b_time);
-	// printf("Speedup of Bitonic Sorts: %f\n", Speedup);
-
 	free(arr_serial);
 	free(arr_Open_mp);
 	free(arr_MPI);

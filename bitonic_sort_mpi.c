@@ -45,12 +45,6 @@ void quickSort(int arr[], int low, int high)
         // pi is the partition return index of pivot
 
         int pi = partition(arr, low, high);
-
-        // Recursion Call
-        // smaller element than pivot goes left and
-        // higher element goes right
-
-        // we know that the pivot element is at the right place and everything to the left of the pivot is less than the pivot
         quickSort(arr, low, pi - 1);
         quickSort(arr, pi + 1, high);
     }
@@ -167,7 +161,6 @@ int main(int argc, char *argv[])
     MPI_Allgather(arr_MPI + low, high, MPI_INT, arr_MPI, high, MPI_INT, MPI_COMM_WORLD);
     if (rank == 0)
     {
-
         bitonicMerge(arr_MPI, low, segment * 2, 1);
     }
     else if (rank == 2)
@@ -203,7 +196,7 @@ int main(int argc, char *argv[])
     // {
     //     printf("%d ", arr_MPI[i]);
     // }
-  
+
     if (rank == 0)
     {
         end = MPI_Wtime();
@@ -217,6 +210,7 @@ int main(int argc, char *argv[])
     }
 
     free(arr_MPI);
+    free(arr_serial);
     free(array);
     MPI_Finalize();
     return 0;
