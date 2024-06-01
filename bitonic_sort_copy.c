@@ -150,61 +150,53 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	srand(time(0));
-	//  this is just creating the array i am going to sort
-	for (int i = 0; i < size; i++)
-	{
-		array[i] = rand() % size + 1;
-		arr_serial[i] = array[i];
-
-		arr_Open_mp[i] = arr_serial[i];
-		arr_MPI[i] = arr_serial[i];
-	}
 	int n = size;
-
-	// int cut_off = pow(2, p - 3);
 	double start, end;
-	double total_time = 0.0;
-	int num_runs = 1;
+	double total_time_s = 0.0;
+	double total_time_p = 0.0;
+	int num = atoi(argv[2]);
+	int num_runs = 10;
+	//  this is just creating the array i am going to sort
 	for (int i = 0; i < num_runs; i++)
 	{
-		start = omp_get_wtime();
-		quickSort(arr_serial, 0, n - 1);
+		for (int i = 0; i < size; i++)
+		{
+			array[i] = rand() % size + 1;
+			arr_serial[i] = array[i];
 
-		end = omp_get_wtime();
+			arr_Open_mp[i] = arr_serial[i];
+			arr_MPI[i] = arr_serial[i];
+		}
+
 		for (int i = 0; i < n; i++)
 		{
 			arr_serial[i] = array[i];
 		}
+		start = omp_get_wtime();
+		quickSort(arr_serial, 0, n - 1);
+		end = omp_get_wtime();
 
-		total_time += end - start;
-	}
-	quickSort(arr_serial, 0, n - 1);
-	double q_time = total_time / num_runs;
-	isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
-	printf("QuickSort Time taken: %f\n", q_time);
-	int cut_off = 0;
-	if (p < 5)
-	{
-		cut_off = pow(2, p);
-	}
-	else
-	{
-		cut_off = pow(2, p - 4);
-	}
+		total_time_s += end - start;
 
-	omp_set_nested(1);
-	// omp_set_num_threads(16);
-	total_time = 0.0;
+		int cut_off = 0;
+		if (p < 5)
+		{
+			cut_off = pow(2, p);
+		}
+		else
+		{
+			cut_off = pow(2, p - 3);
+		}
 
-	for (int i = 0; i < num_runs; i++)
-	{
-		// for (int i = 0; i < n; i++)
-		// {
-		// 	arr_Open_mp[i] = array[i];
-		// }
+		omp_set_nested(1);
+		// omp_set_num_threads(2);
+		for (int i = 0; i < n; i++)
+		{
+			arr_Open_mp[i] = array[i];
+		}
 		start = omp_get_wtime();
 
-#pragma omp parallel num_threads(8)
+#pragma omp parallel num_threads(num)
 		{
 
 #pragma omp single
@@ -214,16 +206,17 @@ int main(int argc, char *argv[])
 		}
 		end = omp_get_wtime();
 
-		total_time += end - start;
+		total_time_p += end - start;
 	}
-
-	double b_time = total_time / num_runs;
-	// bitonicSort(arr_Open_mp, 0, n, 1, 0, cut_off);
+	double q_time = total_time_s / num_runs;
+	isSorted(arr_serial, n) ? printf("Sorted\n") : printf("Not Sorted\n");
+	printf("QuickSort Time taken: %f\n", q_time);
+	double b_time = total_time_p / num_runs;
 	isSorted(arr_Open_mp, n) ? printf("Sorted\n") : printf("Not Sorted\n");
 	printf("Average Bitonic Time taken: %f\n", b_time);
-
 	double Speedup = (q_time) / (b_time);
 	printf("Speedup: %f\n", Speedup);
+
 	free(arr_serial);
 	free(arr_Open_mp);
 	free(arr_MPI);
